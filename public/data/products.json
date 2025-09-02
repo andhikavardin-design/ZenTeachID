@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1",
+    "name": "ASUS ROG Strix",
+    "image": "Video/A.jpg",
+    "price": 15000000,
+    "description": "Laptop gaming ASUS ROG Strix menawarkan performa maksimal untuk pengalaman bermain game yang tak tertandingi."
+  },
+  {
+    "id": "2",
+    "name": "ASUS ZenBook",
+    "image": "Video/b.jpg",
+    "price": 12500000,
+    "description": "ASUS ZenBook adalah laptop ultra-portabel yang stylish dan bertenaga, ideal untuk produktivitas saat bepergian."
+  },
+  {
+    "id": "3",
+    "name": "ASUS TUF Gaming",
+    "image": "Video/c.jpg",
+    "price": 13000000,
+    "description": "ASUS TUF Gaming dirancang untuk daya tahan ekstrem dan performa gaming yang andal, cocok untuk para gamer yang membutuhkan ketangguhan."
+  },
+  {
+    "id": "4",
+    "name": "ASUS VivoBook",
+    "image": "Video/d.jpg",
+    "price": 10500000,
+    "description": "ASUS VivoBook adalah seri laptop yang menawarkan keseimbangan sempurna antara performa dan gaya, dengan berbagai pilihan warna."
+  },
+  {
+    "id": "5",
+    "name": "ASUS ROG Zephyrus",
+    "image": "Video/e.jpg",
+    "price": 18000000,
+    "description": "Laptop gaming super tipis dan ringan, ASUS ROG Zephyrus, tidak mengorbankan performa. Sangat cocok untuk para gamer profesional."
+  },
+  {
+    "id": "6",
+    "name": "ASUS ExpertBook",
+    "image": "Video/f.jpg",
+    "price": 11500000,
+    "description": "Dirancang untuk profesional, ASUS ExpertBook menawarkan keamanan tingkat tinggi dan performa bisnis yang solid."
+  },
+  {
+    "id": "7",
+    "name": "ASUS Chromebook",
+    "image": "Video/g.jpg",
+    "price": 5000000,
+    "description": "Laptop yang cepat, sederhana, dan aman untuk penggunaan sehari-hari, didukung oleh sistem operasi Chrome OS."
+  },
+  {
+    "id": "8",
+    "name": "ASUS Zenbook Duo",
+    "image": "Video/h.jpg",
+    "price": 16500000,
+    "description": "ASUS Zenbook Duo adalah laptop revolusioner dengan dua layar, ideal untuk multitasking dan kreativitas."
+  },
+  {
+    "id": "9",
+    "name": "ASUS ProArt Studiobook",
+    "image": "Video/i.jpg",
+    "price": 22000000,
+    "description": "Laptop workstation mobile yang kuat, dirancang khusus untuk para kreator dan desainer profesional."
+  },
+  {
+    "id": "10",
+    "name": "ASUS ROG Flow",
+    "image": "Video/j.jpg",
+    "price": 17500000,
+    "description": "ASUS ROG Flow adalah laptop gaming yang fleksibel, dapat berfungsi sebagai laptop, tablet, atau dihubungkan ke XG Mobile untuk performa ekstra."
+  },
+  {
+    "id": "11",
+    "name": "ASUS ZenBook Flip",
+    "image": "Video/k.jpg",
+    "price": 13500000,
+    "description": "Laptop konvertibel 2-in-1 yang dapat berputar 360 derajat, menawarkan fleksibilitas untuk bekerja dan bermain."
+  },
+  {
+    "id": "12",
+    "name": "ASUS TUF Dash",
+    "image": "Video/l.jpg",
+    "price": 14000000,
+    "description": "Laptop gaming yang ringkas dan bertenaga dengan desain minimalis, ideal untuk para gamer yang sering bepergian."
+  },
+  {
+    "id": "13",
+    "name": "ASUS VivoBook Pro",
+    "image": "Video/m.jpg",
+    "price": 12800000,
+    "description": "Seri VivoBook Pro dirancang untuk performa tinggi, dengan layar OLED yang menakjubkan dan komponen kuat."
+  },
+  {
+    "id": "14",
+    "name": "ASUS Zenbook S",
+    "image": "Video/n.jpg",
+    "price": 15500000,
+    "description": "Zenbook S adalah laptop ultra-tipis yang elegan dan ringan, menawarkan mobilitas tanpa kompromi."
+  },
+  {
+    "id": "15",
+    "name": "ASUS ExpertCenter",
+    "image": "Video/o.jpg",
+    "price": 9500000,
+    "description": "PC desktop bisnis yang handal dan aman, ideal untuk kebutuhan kantor dan profesional."
+  }
+]
