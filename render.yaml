@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: zenteachid
+    env: php
+    plan: free
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      cp .env.example .env || true
+      php artisan key:generate
+      php artisan storage:link || true
+      php artisan config:cache
+      php artisan route:cache
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
