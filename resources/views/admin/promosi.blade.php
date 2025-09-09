@@ -128,6 +128,18 @@
         
         /* Tambahan styling untuk input harga lama */
         #oldPrice { width: 100%; margin-bottom: 6px; padding: 5px; border-radius: 5px; border: none; outline: none; font-size: 12px; }
+        
+        /* Tambahan CSS untuk stok */
+        .card .stock-info {
+            font-size: 14px;
+            color: #8aff8a; /* Hijau muda untuk stok */
+            font-weight: bold;
+            margin-top: -5px;
+            margin-bottom: 5px;
+        }
+        .card .stock-info.habis {
+            color: #ff8a8a; /* Merah muda untuk stok habis */
+        }
 
         /* CSS untuk deskripsi yang dapat di-scroll */
         .card-text-container {
@@ -201,6 +213,7 @@
         <input type="text" id="productName" placeholder="Nama Produk">
         <input type="number" id="oldPrice" placeholder="Harga Normal">
         <input type="number" id="productPrice" placeholder="Harga Promo">
+        <input type="number" id="productStock" placeholder="Stok Produk">
         <textarea id="productDescription" rows="4" placeholder="Deskripsi Produk"></textarea>
         <input type="file" id="productImage">
         <img id="imagePreview" src="" alt="Preview Gambar">
@@ -210,7 +223,7 @@
 </div>
 
 <script>
-    // Data promosi awal
+    // Data promosi awal, tambahkan properti 'stock'
     const initialPromotions = [
         {
             id: '1',
@@ -218,7 +231,8 @@
             price: 25000000,
             oldPrice: 28000000,
             description: 'Laptop gaming ultra-portabel dengan performa tinggi. Cocok untuk gamer dan kreator konten yang sering bepergian.',
-            image: 'Video/A.jpg'
+            image: 'Video/A.jpg',
+            stock: 10
         },
         {
             id: '2',
@@ -226,7 +240,8 @@
             price: 15500000,
             oldPrice: 17000000,
             description: 'Laptop gaming tangguh dengan daya tahan baterai luar biasa dan harga yang terjangkau. Ideal untuk gaming kasual.',
-            image: 'Video/B.jpg'
+            image: 'Video/B.jpg',
+            stock: 15
         },
         {
             id: '3',
@@ -234,7 +249,8 @@
             price: 19800000,
             oldPrice: 21500000,
             description: 'Laptop premium dengan layar OLED yang memukau. Desain tipis dan ringan, sempurna untuk profesional.',
-            image: 'Video/C.jpg'
+            image: 'Video/C.jpg',
+            stock: 5
         },
         {
             id: '4',
@@ -242,7 +258,8 @@
             price: 13900000,
             oldPrice: 15000000,
             description: 'Laptop andal untuk produktivitas sehari-hari dan hiburan, dilengkapi layar NanoEdge yang imersif.',
-            image: 'Video/D.jpg'
+            image: 'Video/D.jpg',
+            stock: 20
         }
     ];
     
@@ -302,6 +319,10 @@
                     priceHTML = `<div class="price-container"><p class="old-price">Rp ${numberWithCommas(item.oldPrice)}</p><p class="new-price">Rp ${numberWithCommas(item.price)}</p></div>`;
                 }
 
+                // Tambahkan elemen untuk menampilkan stok
+                const stockText = item.stock > 0 ? `Stok: ${item.stock}` : 'Stok: Habis';
+                const stockClass = item.stock > 0 ? 'stock-info' : 'stock-info habis';
+
                 card.innerHTML = `
                     <button class="edit-button" onclick="event.stopPropagation(); openEditModal(${index})">Edit</button>
                     <button class="delete-button" onclick="event.stopPropagation(); deletePromotion(${index})">Hapus</button>
@@ -310,6 +331,7 @@
                     <div class="card-text-container">
                         <p>${item.description}</p>
                     </div>
+                    <p class="${stockClass}">${stockText}</p>
                     ${priceHTML}
                     <p style="color:#ccc;font-size:14px;">Pembelian hanya khusus user.</p>
                     <button class="buy-btn" disabled>Gunakan akun user</button>
@@ -353,6 +375,7 @@
         document.getElementById('productName').value = '';
         document.getElementById('productPrice').value = '';
         document.getElementById('oldPrice').value = '';
+        document.getElementById('productStock').value = '';
         document.getElementById('productDescription').value = '';
         document.getElementById('productImage').value = '';
         document.getElementById('imagePreview').style.display = 'none';
@@ -366,6 +389,7 @@
         document.getElementById('productName').value = p.name;
         document.getElementById('productPrice').value = p.price;
         document.getElementById('oldPrice').value = p.oldPrice || '';
+        document.getElementById('productStock').value = p.stock || 0;
         document.getElementById('productDescription').value = p.description;
         document.getElementById('productImage').value = '';
         let imgSrc = p.image.startsWith("data:image") ? p.image : "{{ asset('') }}" + p.image;
@@ -381,12 +405,13 @@
         const name = document.getElementById('productName').value;
         const price = document.getElementById('productPrice').value;
         const oldPrice = document.getElementById('oldPrice').value;
+        const stock = document.getElementById('productStock').value;
         const desc = document.getElementById('productDescription').value;
         const file = document.getElementById('productImage').files[0];
         const index = document.getElementById('editProductIndex').value;
         const isEdit = index !== '';
-        if (!name || !price) {
-            alert('Nama & Harga wajib diisi');
+        if (!name || !price || !stock) {
+            alert('Nama, Harga, dan Stok wajib diisi');
             return;
         }
 
@@ -398,12 +423,13 @@
                     name,
                     price: parseInt(price),
                     oldPrice: oldPrice ? parseInt(oldPrice) : null,
+                    stock: parseInt(stock),
                     description: desc,
                     image: e.target.result
                 };
                 if(isEdit){ promotions[index] = newP; } else { promotions.push(newP); }
-                savePromotions(); // Memanggil fungsi savePromotions
-                renderPromotions(); // Memanggil fungsi renderPromotions
+                savePromotions();
+                renderPromotions();
                 closeEditModal();
             };
             r.readAsDataURL(file);
@@ -413,20 +439,21 @@
                 name,
                 price: parseInt(price),
                 oldPrice: oldPrice ? parseInt(oldPrice) : null,
+                stock: parseInt(stock),
                 description: desc,
                 image: isEdit ? promotions[index].image : 'images/placeholder.jpg'
             };
             if(isEdit){ promotions[index] = newP; } else { promotions.push(newP); }
-            savePromotions(); // Memanggil fungsi savePromotions
-            renderPromotions(); // Memanggil fungsi renderPromotions
+            savePromotions();
+            renderPromotions();
             closeEditModal();
         }
     }
     function deletePromotion(i){
         if(confirm("Hapus produk " + promotions[i].name + " ?")){
             promotions.splice(i,1); // Menggunakan variabel promotions
-            savePromotions(); // Memanggil fungsi savePromotions
-            renderPromotions(); // Memanggil fungsi renderPromotions
+            savePromotions();
+            renderPromotions();
         }
     }
 
