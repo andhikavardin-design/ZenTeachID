@@ -54,15 +54,40 @@
             font-size: 2em;
         }
 
+        /* Container for password field and toggle icon */
+        .password-container {
+            position: relative;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
         input[type="text"], input[type="password"] {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
             border: none;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.2);
             color: white;
             outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: white;
         }
 
         input[type="submit"] {
@@ -75,6 +100,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: background 0.3s ease;
+            margin-top: 10px;
         }
 
         input[type="submit"]:hover {
@@ -112,11 +138,24 @@
         }
 
         .error-message {
-            color: red;
+            color: #ff4d4d;
+            background-color: rgba(255, 77, 77, 0.1);
+            border-radius: 8px;
+            padding: 8px;
             font-size: 0.9em;
             text-align: center;
-            margin-top: -5px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .success-message {
+            color: #4dff4d;
+            background-color: rgba(77, 255, 77, 0.1);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 15px;
             display: block;
         }
 
@@ -131,6 +170,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
@@ -143,7 +183,7 @@
         <div class="form-container">
             <h2>Login</h2>
             @if (session('success'))
-                <div style="color: green; text-align: center; margin-bottom: 10px;">
+                <div class="success-message">
                     {{ session('success') }}
                 </div>
             @endif
@@ -153,7 +193,10 @@
             <form method="post" action="{{ route('login') }}">
                 @csrf
                 <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <div class="password-container">
+                    <input type="password" name="password" id="password-field" placeholder="Password" required>
+                    <i class="fas fa-eye password-toggle" id="password-toggle-icon"></i>
+                </div>
                 <input type="submit" value="Login">
             </form>
             <div class="switch-link">
@@ -165,5 +208,21 @@
         </div>
     </div>
     
+    <script>
+        const passwordField = document.getElementById('password-field');
+        const passwordToggle = document.getElementById('password-toggle-icon');
+
+        passwordToggle.addEventListener('click', function() {
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                passwordToggle.classList.remove('fa-eye');
+                passwordToggle.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                passwordToggle.classList.remove('fa-eye-slash');
+                passwordToggle.classList.add('fa-eye');
+            }
+        });
+    </script>
 </body>
 </html>
