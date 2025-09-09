@@ -7,13 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ==================== Global Styles & Animations ==================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* ==================== Global Styles & Typography ==================== */
         :root {
             --primary-color: #00c2ff;
             --secondary-color: #00e0ff;
@@ -22,8 +16,33 @@
             --text-color: #e0e0e0;
             --text-highlight: #ffffff;
             --button-border-radius: 8px;
+            --card-border-radius: 15px;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary-color);
+        }
+
+        /* ==================== Keyframe Animations ==================== */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -34,19 +53,69 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        body, html {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--background-dark);
+        /* ==================== Reusable Components ==================== */
+        .section-wrapper {
+            padding: 100px 40px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2em, 5vw, 2.8em);
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: clamp(1em, 2vw, 1.2em);
             color: var(--text-color);
-            line-height: 1.6;
-            scroll-behavior: smooth;
-            overflow-x: hidden;
+            max-width: 800px;
+            margin: 0 auto 60px;
+        }
+
+        .cta-button, .nav-button {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: var(--button-border-radius);
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s, color 0.3s;
+        }
+        
+        .cta-button:hover, .nav-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 194, 255, 0.3);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--background-dark);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-highlight);
+            border: 2px solid var(--text-highlight);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--text-highlight);
+            color: var(--background-dark);
         }
         
         /* ==================== Header & Navigasi ==================== */
         header {
             padding: 15px 40px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -65,6 +134,12 @@
 
         .logo-img {
             height: 40px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-img:hover {
+            transform: rotate(360deg);
         }
 
         .logo-text {
@@ -74,22 +149,16 @@
             color: var(--primary-color);
             letter-spacing: 1px;
         }
+        
         .nav-buttons {
             display: flex;
             gap: 20px;
         }
 
-        .nav-button {
-            text-decoration: none;
-            color: var(--text-highlight);
-            padding: 10px 25px;
-            border-radius: var(--button-border-radius);
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
         .btn-login {
+            padding: 10px 25px;
             border: 2px solid var(--primary-color);
+            color: var(--text-highlight);
         }
 
         .btn-login:hover {
@@ -99,6 +168,7 @@
         }
 
         .btn-register {
+            padding: 10px 25px;
             background-color: var(--primary-color);
             color: var(--background-dark);
         }
@@ -115,7 +185,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background-image: url('{{ asset('Video/asus-rog-strix-scar.jpg') }}');
+            background-image: url('https://via.placeholder.com/1920x1080.png?text=ASUS+Gaming+Laptop');
             background-attachment: fixed;
             background-position: center;
             background-size: cover;
@@ -129,7 +199,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.7);
         }
 
         .hero-content {
@@ -141,7 +211,7 @@
         }
 
         h1 {
-            font-size: 4em;
+            font-size: clamp(3em, 8vw, 4em);
             margin-bottom: 10px;
             color: var(--primary-color);
             font-weight: 700;
@@ -149,7 +219,7 @@
         }
 
         .tagline {
-            font-size: 1.5em;
+            font-size: clamp(1.2em, 3vw, 1.5em);
             font-weight: 300;
             color: var(--text-color);
             margin-bottom: 40px;
@@ -158,56 +228,12 @@
 
         .cta-buttons {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
             gap: 25px;
         }
 
-        .cta-button {
-            text-decoration: none;
-            padding: 15px 40px;
-            border-radius: var(--button-border-radius);
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
-        }
-        .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 194, 255, 0.3);
-        }
-        .btn-jelajahi {
-            background-color: var(--primary-color);
-            color: var(--background-dark);
-            border: 2px solid var(--primary-color);
-        }
-        .btn-jelajahi:hover { background-color: var(--secondary-color); border-color: var(--secondary-color); }
-        .btn-login-hero {
-            background-color: transparent;
-            color: var(--text-highlight);
-            border: 2px solid var(--text-highlight);
-        }
-        .btn-login-hero:hover { background-color: var(--text-highlight); color: var(--background-dark); }
-        
-        /* ==================== Section Keunggulan ==================== */
-        .section-wrapper {
-            padding: 100px 40px;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.8em;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.2em;
-            color: var(--text-color);
-            max-width: 800px;
-            margin: auto auto 60px;
-        }
-
+        /* ==================== Section Keunggulan (Features) ==================== */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -219,7 +245,7 @@
         .feature-card {
             background: var(--background-light);
             padding: 40px;
-            border-radius: 15px;
+            border-radius: var(--card-border-radius);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s, box-shadow 0.3s;
             text-align: center;
@@ -264,11 +290,13 @@
         .category-card {
             position: relative;
             height: 350px;
-            border-radius: 15px;
+            border-radius: var(--card-border-radius);
             overflow: hidden;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             transition: transform 0.4s, box-shadow 0.4s;
+            cursor: pointer;
         }
+        
         .category-card:hover {
             transform: translateY(-15px);
             box-shadow: 0 15px 40px rgba(0, 194, 255, 0.3);
@@ -280,9 +308,11 @@
             object-fit: cover;
             transition: transform 0.4s;
         }
+        
         .category-card:hover img {
             transform: scale(1.1);
         }
+
         .category-card-overlay {
             position: absolute;
             top: 0;
@@ -294,6 +324,7 @@
             align-items: flex-end;
             padding: 30px;
         }
+
         .category-card h3 {
             font-size: 2em;
             color: var(--text-highlight);
@@ -317,14 +348,17 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
-        .testimonial-slider::-webkit-scrollbar { display: none; }
+        
+        .testimonial-slider::-webkit-scrollbar {
+            display: none;
+        }
 
         .testimonial-card {
             flex: 0 0 100%;
             scroll-snap-align: center;
             background: rgba(255, 255, 255, 0.05);
             padding: 40px;
-            border-radius: 15px;
+            border-radius: var(--card-border-radius);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
             min-height: 250px;
@@ -345,7 +379,7 @@
             color: var(--primary-color);
             font-size: 1.2em;
         }
-
+        
         /* ==================== Footer ==================== */
         footer {
             padding: 25px 40px;
@@ -353,6 +387,35 @@
             text-align: center;
             font-size: 0.9em;
             color: #777;
+        }
+
+        /* ==================== Responsive Design ==================== */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 15px 20px;
+                gap: 15px;
+            }
+
+            .logo-text {
+                font-size: 1.2em;
+            }
+
+            .nav-buttons {
+                gap: 10px;
+            }
+
+            .hero-content {
+                padding: 30px;
+            }
+            
+            .section-wrapper {
+                padding: 80px 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -370,16 +433,16 @@
 </header>
 
 <main>
-    <div class="hero-section" id="home">
+    <section class="hero-section" id="home">
         <div class="hero-content">
             <h1>Platform ASUS Terlengkap</h1>
             <p class="tagline">Temukan laptop, PC gaming, dan aksesoris terbaik dengan harga kompetitif dan layanan terpercaya. #ZenTechID</p>
             <div class="cta-buttons">
-                <a href="#products" class="cta-button btn-jelajahi">Jelajahi Produk</a>
-                <a href="{{ route('login') }}" class="cta-button btn-login-hero">Sudah Punya Akun?</a>
+                <a href="#products" class="cta-button btn-primary">Jelajahi Produk</a>
+                <a href="{{ route('login') }}" class="cta-button btn-secondary">Sudah Punya Akun?</a>
             </div>
         </div>
-    </div>
+    </section>
 
     <section class="section-wrapper" id="features">
         <h2 class="section-title">Mengapa Memilih ZenTechID?</h2>
@@ -407,28 +470,24 @@
         <h2 class="section-title">Laptop Unggulan</h2>
         <p class="section-subtitle">Temukan laptop ASUS terbaik yang sesuai dengan kebutuhan Anda.</p>
         <div class="category-grid">
-            
             <a href="{{ route('login') }}" class="category-card">
                 <img src="{{ asset('Video/e.jpg') }}" alt="ASUS ROG Strix SCAR 17 G733P">
                 <div class="category-card-overlay">
                     <h3>ASUS ROG Strix SCAR 17 G733P</h3>
                 </div>
             </a>
-
             <a href="{{ route('login') }}" class="category-card">
                 <img src="{{ asset('Video/b.jpg') }}" alt="ASUS Zenbook 14 OLED UX3402">
                 <div class="category-card-overlay">
                     <h3>ASUS Zenbook 14 OLED UX3402</h3>
                 </div>
             </a>
-
             <a href="{{ route('login') }}" class="category-card">
                 <img src="{{ asset('Video/d.jpg') }}" alt="ASUS Vivobook Pro 15 OLED M6500">
                 <div class="category-card-overlay">
                     <h3>ASUS Vivobook Pro 15 OLED M6500</h3>
                 </div>
             </a>
-
         </div>
     </section>
 
