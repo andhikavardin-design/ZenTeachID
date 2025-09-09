@@ -51,6 +51,7 @@
         .edit-button, .delete-button { position: absolute; top: 10px; font-size: 12px; padding: 5px 8px; border-radius: 6px; cursor: pointer; border: none; z-index: 10;}
         .edit-button { right: 58px; background-color: #ffc107; color: #000; }
         .delete-button { right: 10px; background-color: #dc3545; color: #fff; }
+        .stock-info { font-size: 0.9em; color: #00c2ff; font-weight: bold; margin-top: 10px; }
 
         /* Gaya untuk modal Tambah/Edit Produk */
         #editModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
@@ -83,7 +84,6 @@
             border-radius: 10px;
             border: 2px solid #1e1e1e;
         }
-
         #editModal h3 { text-align: center; color: #00e0ff; margin-bottom: 10px; }
         #editModal input[type="text"], 
         #editModal input[type="number"], 
@@ -129,6 +129,7 @@
         .detail-info h3 { font-size: 2em; color: #00e0ff; margin-bottom: 10px; }
         .detail-info p { font-size: 1em; line-height: 1.5; margin-bottom: 10px; color: #ccc; }
         .detail-info .price { font-size: 1.5em; font-weight: bold; color: #fff; margin-bottom: 20px; }
+        .detail-info .stock-info { font-size: 1em; color: #fff; font-weight: bold; margin-bottom: 10px; }
         
         .comment-section { margin-top: 20px; }
         .comment-section h4 { border-bottom: 2px solid #00e0ff; padding-bottom: 5px; margin-bottom: 15px; }
@@ -193,6 +194,7 @@
         <input type="hidden" id="editProductIndex">
         <input type="text" id="productName" placeholder="Nama Produk">
         <input type="number" id="productPrice" placeholder="Harga">
+        <input type="number" id="productStock" placeholder="Jumlah Stok">
         <textarea id="productDescription" rows="4" placeholder="Deskripsi Produk"></textarea>
         <input type="file" id="productImage">
         <img id="imagePreview" src="" alt="Preview Gambar">
@@ -213,6 +215,7 @@
             <h3 id="detailName"></h3>
             <p id="detailDescription"></p>
             <p class="price" id="detailPrice"></p>
+            <p class="stock-info" id="detailStock"></p>
             
             <div class="comment-section">
                 <h4>Komentar dan Rating Pengguna</h4>
@@ -281,7 +284,9 @@
         document.getElementById('detailName').innerText = product.name;
         document.getElementById('detailDescription').innerText = product.description;
         document.getElementById('detailPrice').innerText = 'Rp ' + numberWithCommas(product.price);
-        
+        // Display stock in detail modal
+        document.getElementById('detailStock').innerText = `Stok: ${product.stock}`;
+
         loadAndRenderComments(product.name);
         document.getElementById('detailModal').style.display = 'flex';
     }
@@ -311,6 +316,7 @@
                         <p>${item.description}</p>
                     </div>
                     <p>Rp ${numberWithCommas(item.price)}</p>
+                    <p class="stock-info">Stok: ${item.stock}</p>
                 `;
                 // Gunakan index dari filteredProducts untuk menampilkan modal
                 card.onclick = () => showDetailModal(index);
@@ -324,6 +330,8 @@
         document.getElementById('modalTitle').innerText = 'Tambah Produk';
         document.getElementById('productName').value = '';
         document.getElementById('productPrice').value = '';
+        // Set default stock value for new product
+        document.getElementById('productStock').value = 0;
         document.getElementById('productDescription').value = '';
         document.getElementById('productImage').value = '';
         document.getElementById('imagePreview').src = '';
@@ -341,6 +349,8 @@
         document.getElementById('modalTitle').innerText = 'Edit Produk';
         document.getElementById('productName').value = p.name;
         document.getElementById('productPrice').value = p.price;
+        // Set stock value for editing
+        document.getElementById('productStock').value = p.stock;
         document.getElementById('productDescription').value = p.description;
         document.getElementById('productImage').value = '';
         let imgSrc = p.image.startsWith("data:image") ? p.image : p.image;
@@ -357,13 +367,15 @@
     function saveProduct() {
         const name = document.getElementById('productName').value;
         const price = document.getElementById('productPrice').value;
+        // Get stock value from input
+        const stock = document.getElementById('productStock').value;
         const desc = document.getElementById('productDescription').value;
         const file = document.getElementById('productImage').files[0];
         const index = document.getElementById('editProductIndex').value;
         const isEdit = index !== '';
 
-        if (!name || !price) {
-            alert('Nama & Harga wajib diisi');
+        if (!name || !price || !stock) {
+            alert('Nama, Harga, dan Stok wajib diisi');
             return;
         }
 
@@ -376,7 +388,7 @@
                     price: parseInt(price), 
                     description: desc, 
                     image: e.target.result,
-                    stock: isEdit && products[index].stock !== undefined ? products[index].stock : 10
+                    stock: parseInt(stock) // Save the new stock value
                 };
                 if (isEdit) { 
                     products[index] = newP; 
@@ -395,7 +407,7 @@
                 price: parseInt(price), 
                 description: desc, 
                 image: isEdit ? products[index].image : PLACEHOLDER_IMG,
-                stock: isEdit && products[index].stock !== undefined ? products[index].stock : 10
+                stock: parseInt(stock) // Save the new stock value
             };
             if (isEdit) { 
                 products[index] = newP; 
