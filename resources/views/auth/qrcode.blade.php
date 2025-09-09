@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>QR Code Land Page</title>
+    <title>QR Code Repo GitHub</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,14 +57,17 @@
 </head>
 <body>
     <div class="container">
-        <h2>Scan QR Code untuk Akses aplikasi ZenTechID</h2>
+        <h2>Scan QR Code untuk Akses Repo GitHub ZenTechID</h2>
         <div class="qr-wrapper">
-            <img src="{{ asset('Video/qr.jpg') }}" alt="QR Code" width="250">
-            <!-- Link muncul pas mouse hover -->
-            <a href="{{ url('/landpage') }}" class="qr-link" target="_blank">
-                https://127.0.0.1:8000/ZenTechID
+            <!-- Ganti qr.jpg dengan QR code yang berisi link GitHub -->
+            <img src="{{  asset('Video/Zen.png') }}" alt="QR Code" width="250">
+            
+            <!-- Link ke GitHub -->
+            <a href="https://github.com/andhikavardin-design/ZenTeachID" class="qr-link" target="_blank">
+              
             </a>
         </div>
     </div>
 </body>
 </html>
+
