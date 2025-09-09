@@ -841,6 +841,7 @@
                 <h3 id="descName"></h3>
                 <p id="descDescription"></p>
                 <p class="price" id="descPrice"></p>
+                <p class="stock-info" id="descStock"></p>
                 <div class="modal-actions">
                     <button class="modal-btn add-to-cart-btn" id="modalAddCartBtn">Tambah ke Keranjang</button>
                     <button class="modal-btn buy-now-btn" id="modalBuyNowBtn">Beli Sekarang</button>
@@ -862,7 +863,7 @@
             <button class="submit-comment-btn" onclick="submitComment()">Kirim Komentar</button>
             
             <div id="commentList" class="comment-list">
-                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -877,13 +878,16 @@
             <div>
                 <h4 id="productTitleModal"></h4>
                 <p id="productPriceModal"></p>
+                <p id="productStockModal"></p>
             </div>
         </div>
         
         <form id="buyForm">
             <input type="hidden" id="buyProductId">
-            <input type="hidden" id="buyQuantity">
             
+            <label for="buyQuantity">Jumlah:</label>
+            <input type="number" id="buyQuantity" name="buyQuantity" value="1" min="1" required>
+
             <label for="namaPembeli">Nama Lengkap:</label>
             <input type="text" id="namaPembeli" name="namaPembeli" required>
 
@@ -949,14 +953,13 @@
             <div id="successProductSummary"></div>
             <p><strong>Total Pembayaran:</strong> <span id="successTotalHarga"></span></p>
         </div>
+        <button class="print-btn" onclick="printReceipt()">Cetak Struk</button>
         <button class="success-close-btn" onclick="closeSuccessModal()">Selesai</button>
     </div>
 </div>
 
 <script>
     const initialProducts = [
-        // Ganti nama variabel untuk konsistensi, meskipun namanya 'products'
-        // di sini, kita akan menyimpannya dengan kunci 'promotions'
         {
             id: '1',
             name: 'ASUS ROG Zephyrus G14',
@@ -1013,7 +1016,7 @@
         }
     ];
 
-    let products = []; // Variabel ini sekarang akan menampung data promosi
+    let products = [];
     let currentProduct = null;
     let currentOrderData = {};
 
@@ -1062,10 +1065,19 @@
             return;
         }
 
+        if (product.stock <= 0) {
+            alert('Stok produk ini sudah habis.');
+            return;
+        }
+
         let cart = loadCart();
         const existingItem = cart.find(item => item.id === productId.toString());
 
         if (existingItem) {
+            if (existingItem.quantity >= product.stock) {
+                alert('Stok tidak mencukupi untuk menambahkan produk ini.');
+                return;
+            }
             existingItem.quantity++;
         } else {
             cart.push({
@@ -1089,9 +1101,16 @@
             return;
         }
 
+        if (product.stock <= 0) {
+            alert('Maaf, produk ini sedang tidak tersedia.');
+            return;
+        }
+
         const modalImage = document.getElementById('productImageModal');
         const modalTitle = document.getElementById('productTitleModal');
         const modalPrice = document.getElementById('productPriceModal');
+        const modalStock = document.getElementById('productStockModal');
+        const buyQuantityInput = document.getElementById('buyQuantity');
         
         const imagePath = product.image.startsWith("data:image") ? product.image : product.image;
         const fallbackImage = 'https://via.placeholder.com/80/1c1c1c/999999?text=Tidak+Ada+Gambar';
@@ -1100,9 +1119,11 @@
 
         modalTitle.innerText = product.name;
         modalPrice.innerText = formatRupiah(product.price * quantity);
+        modalStock.innerText = `Stok: ${product.stock}`;
 
         document.getElementById('buyProductId').value = product.id;
-        document.getElementById('buyQuantity').value = quantity;
+        buyQuantityInput.value = quantity;
+        buyQuantityInput.max = product.stock;
         
         document.getElementById('buyForm').reset();
         document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1149,13 +1170,14 @@
         orders.push(newOrder);
         localStorage.setItem('adminOrders', JSON.stringify(orders));
 
-        // Mengubah kunci 'products' menjadi 'promotions' saat memperbarui stok
         let updatedPromotions = JSON.parse(localStorage.getItem('promotions')) || [];
         const boughtProductIndex = updatedPromotions.findIndex(p => p.id === orderData.item.id);
         if (boughtProductIndex > -1) {
             updatedPromotions[boughtProductIndex].stock -= newOrder.items[0].quantity;
         }
         localStorage.setItem('promotions', JSON.stringify(updatedPromotions));
+        products = updatedPromotions; // Update the local 'products' array
+        renderProducts(); // Re-render the product list to show new stock
 
         closeConfirmModal();
         showSuccessModal(orderData);
@@ -1190,14 +1212,14 @@
         modal.style.display = 'flex';
     }
 
-    function loadProducts() { // Fungsi ini akan memuat data promosi
+    function loadProducts() {
         try {
             const storedPromotions = localStorage.getItem('promotions');
             if (storedPromotions) {
                 products = JSON.parse(storedPromotions);
             } else {
                 products = initialProducts;
-                savePromotions(); // Simpan data awal dengan kunci 'promotions'
+                savePromotions();
             }
         } catch (e) {
             console.error("Gagal memuat promosi dari localStorage", e);
@@ -1205,7 +1227,7 @@
         }
     }
 
-    function savePromotions() { // Fungsi baru untuk menyimpan data promosi
+    function savePromotions() {
         try {
             localStorage.setItem('promotions', JSON.stringify(products));
         } catch (e) {
@@ -1256,21 +1278,32 @@
                 card.className = 'card';
                 
                 let priceHTML = `<div class="card-price-container">
-                                     ${item.oldPrice && item.oldPrice > item.price ? `<p class="card-old-price">Rp ${numberWithCommas(item.oldPrice)}</p>` : ''}
-                                     <p class="card-new-price">Rp ${numberWithCommas(item.price)}</p>
-                                     </div>`;
+                                        ${item.oldPrice && item.oldPrice > item.price ? `<p class="card-old-price">Rp ${numberWithCommas(item.oldPrice)}</p>` : ''}
+                                        <p class="card-new-price">Rp ${numberWithCommas(item.price)}</p>
+                                        </div>`;
+                
+                let stockInfo = '';
+                if (item.stock > 0) {
+                    stockInfo = `<p class="card-stock">Stok: ${item.stock}</p>`;
+                    card.classList.add('in-stock');
+                    card.onclick = () => showDescriptionModal(item);
+                } else {
+                    stockInfo = `<p class="card-stock sold-out">Stok Habis</p>`;
+                    card.classList.add('out-of-stock');
+                }
                 
                 card.innerHTML = `
                     <div class="card-image-wrapper">
                         <img src="${imgSrc}" alt="${item.name}" onerror="this.src='{{ asset('images/placeholder.jpg') }}';">
+                        ${item.stock <= 0 ? '<span class="sold-out-badge">HABIS</span>' : ''}
                     </div>
                     <h3 class="card-title">${item.name}</h3>
                     <div class="card-description-container">
                         <p class="card-description">${item.description}</p>
                     </div>
                     ${priceHTML}
+                    ${stockInfo}
                 `;
-                card.onclick = () => showDescriptionModal(item);
                 grid.appendChild(card);
             });
         }
@@ -1288,10 +1321,26 @@
         }
         document.getElementById('descPrice').innerText = priceText;
         
+        const stockInfoElement = document.getElementById('descStock');
+        const addToCartBtn = document.getElementById('modalAddCartBtn');
+        const buyNowBtn = document.getElementById('modalBuyNowBtn');
+
+        if (product.stock > 0) {
+            stockInfoElement.innerText = `Stok Tersedia: ${product.stock}`;
+            stockInfoElement.style.color = 'green';
+            addToCartBtn.disabled = false;
+            buyNowBtn.disabled = false;
+        } else {
+            stockInfoElement.innerText = 'Stok Habis';
+            stockInfoElement.style.color = 'red';
+            addToCartBtn.disabled = true;
+            buyNowBtn.disabled = true;
+        }
+
         document.getElementById('descDescription').innerText = product.description;
         
-        document.getElementById('modalAddCartBtn').dataset.productId = product.id;
-        document.getElementById('modalBuyNowBtn').dataset.productId = product.id;
+        addToCartBtn.dataset.productId = product.id;
+        buyNowBtn.dataset.productId = product.id;
         
         renderComments(product.name);
         document.getElementById('descriptionModal').style.display = 'flex';
@@ -1365,9 +1414,85 @@
             alert('Mohon masukkan alamat terlebih dahulu.');
         }
     }
+
+    // Fungsi baru untuk mencetak struk
+    function printReceipt() {
+        const successSummary = document.getElementById('successProductSummary');
+        const summaryContent = successSummary.innerHTML;
+        const successNama = document.getElementById('successNama').innerText;
+        const successNomorTelepon = document.getElementById('successNomorTelepon').innerText;
+        const successAlamat = document.getElementById('successAlamat').innerText;
+        const successMetodeBayar = document.getElementById('successMetodeBayar').innerText;
+        const successTotalHarga = document.getElementById('successTotalHarga').innerText;
+        const productName = successSummary.querySelector('span').innerText;
+        const total = successTotalHarga.replace('Rp ', '').replace(/\./g, '');
+
+        const receiptContent = `
+            <html>
+            <head>
+                <title>Struk Pembayaran ZenTechID</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; font-size: 12px; margin: 0; }
+                    .receipt-container { width: 300px; padding: 10px; border: 1px solid #000; margin: 20px auto; }
+                    .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                    .receipt-header h1 { margin: 0; font-size: 16px; }
+                    .receipt-details { margin-bottom: 10px; }
+                    .receipt-details p { margin: 5px 0; }
+                    .receipt-body { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                    .receipt-item { display: flex; justify-content: space-between; }
+                    .receipt-total { text-align: right; font-weight: bold; font-size: 14px; }
+                    .receipt-footer { text-align: center; font-style: italic; margin-top: 10px; }
+                    @media print {
+                        body * { visibility: hidden; }
+                        .receipt-container, .receipt-container * { visibility: visible; }
+                        .receipt-container { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="receipt-container">
+                    <div class="receipt-header">
+                        <h1>ZenTechID</h1>
+                        <p>Struk Pembelian</p>
+                        <p>${new Date().toLocaleDateString('id-ID')}</p>
+                    </div>
+                    <div class="receipt-details">
+                        <p><strong>Nama:</strong> ${successNama}</p>
+                        <p><strong>No. Telp:</strong> ${successNomorTelepon}</p>
+                        <p><strong>Alamat:</strong> ${successAlamat}</p>
+                        <p><strong>Metode Pembayaran:</strong> ${successMetodeBayar}</p>
+                    </div>
+                    <div class="receipt-body">
+                        <div class="receipt-item">
+                            <span>Produk:</span> <span>${productName}</span>
+                        </div>
+                        <div class="receipt-item">
+                            <span>Harga:</span> <span>${successTotalHarga}</span>
+                        </div>
+                    </div>
+                    <div class="receipt-total">
+                        <p>TOTAL: ${successTotalHarga}</p>
+                    </div>
+                    <div class="receipt-footer">
+                        <p>Terima kasih telah berbelanja di ZenTechID!</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(receiptContent);
+        printWindow.document.close();
+        
+        printWindow.onload = () => {
+            printWindow.print();
+            printWindow.close();
+        };
+    }
     
     document.addEventListener('DOMContentLoaded', () => {
-        loadProducts(); // Memuat data promosi
+        loadProducts();
         renderProducts();
         updateCartCount();
         displayUsername();
@@ -1377,13 +1502,23 @@
             addToCart(this.dataset.productId);
         });
         document.getElementById('modalBuyNowBtn').addEventListener('click', function() {
-            showBuyForm(this.dataset.productId);
+            showBuyForm(this.dataset.productId, 1);
         });
+        document.getElementById('buyQuantity').addEventListener('change', function() {
+            const productId = document.getElementById('buyProductId').value;
+            const quantity = parseInt(this.value);
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                document.getElementById('productPriceModal').innerText = formatRupiah(product.price * quantity);
+            }
+        });
+
 
         document.getElementById('buyForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             const productId = document.getElementById('buyProductId').value;
+            const quantity = parseInt(document.getElementById('buyQuantity').value);
             const namaPembeli = document.getElementById('namaPembeli').value;
             const nomorTelepon = document.getElementById('nomorTelepon').value;
             const alamat = document.getElementById('alamat').value;
@@ -1395,13 +1530,18 @@
                 alert('Produk tidak ditemukan.');
                 return;
             }
+
+            if (quantity > productToBuy.stock) {
+                alert('Stok tidak mencukupi untuk jumlah yang Anda pesan.');
+                return;
+            }
             
             currentOrderData = {
                 item: {
                     id: productToBuy.id,
                     title: productToBuy.name,
                     price: productToBuy.price,
-                    quantity: 1,
+                    quantity: quantity,
                     image: productToBuy.image
                 },
                 customer: {
@@ -1421,11 +1561,11 @@
             confirmProductSummary.innerHTML = `
                 <div class="confirm-item">
                     <p><strong>Produk:</strong> ${productToBuy.name}</p>
-                    <p><strong>Jumlah:</strong> 1</p>
+                    <p><strong>Jumlah:</strong> ${quantity}</p>
                     <p><strong>Harga:</strong> ${formatRupiah(productToBuy.price)}</p>
                 </div>
             `;
-            document.getElementById('confirmTotalHarga').innerText = formatRupiah(productToBuy.price);
+            document.getElementById('confirmTotalHarga').innerText = formatRupiah(productToBuy.price * quantity);
             
             closeBuyModal();
             document.getElementById('confirmModal').style.display = 'flex';
@@ -1454,4 +1594,3 @@
     });
 </script>
 </body>
-</html>
