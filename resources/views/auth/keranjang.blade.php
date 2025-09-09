@@ -487,6 +487,21 @@
         .success-close-btn:hover {
             background-color: #0056b3;
         }
+        .print-btn {
+            background-color: #f7a32b;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        .print-btn:hover {
+            background-color: #e09426;
+        }
         /* Keyframes for animations */
         @keyframes modalFadeIn {
             from {
@@ -616,6 +631,7 @@
             <p><strong>Total Pembayaran:</strong> <span id="successTotalHarga"></span></p>
         </div>
         <button class="success-close-btn" onclick="closeSuccessModal()">Selesai</button>
+        <button class="print-btn" onclick="printReceipt()">Cetak Struk</button>
     </div>
 </div>
 
@@ -806,6 +822,47 @@
         closeConfirmModal();
         showSuccessModal(orderData);
     }
+    
+    // START: NEW CODE FOR PRINTING RECEIPT
+    function printReceipt() {
+        const printContent = document.getElementById('successModal').querySelector('.modal-content').innerHTML;
+        const originalBody = document.body.innerHTML;
+        
+        document.body.innerHTML = `
+            <style>
+                body { font-family: 'Poppins', sans-serif; color: #000; background-color: #fff; padding: 20px; }
+                .success-modal-content { text-align: left; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+                .success-summary { text-align: left; }
+                .success-summary p, .success-summary-item { line-height: 1.5; margin: 5px 0; }
+                .success-summary h3, .success-summary h4 { color: #000; text-align: center; }
+                .success-summary h3 { margin-bottom: 20px; }
+                .success-checkmark, .success-close-btn, .print-btn { display: none; }
+                @media print {
+                    body { font-size: 12px; }
+                    .modal-content { box-shadow: none; border: none; padding: 0; margin: 0; }
+                }
+            </style>
+            <div class="success-modal-content">
+                <h3>Struk Pembelian ZenTechID</h3>
+                <div class="success-summary">
+                    <p><strong>Tanggal:</strong> ${new Date().toLocaleDateString('id-ID')}</p>
+                    <p><strong>Nama:</strong> ${document.getElementById('successNama').innerText}</p>
+                    <p><strong>Nomor Telepon:</strong> ${document.getElementById('successNomorTelepon').innerText}</p>
+                    <p><strong>Alamat:</strong> ${document.getElementById('successAlamat').innerText}</p>
+                    <p><strong>Metode Pembayaran:</strong> ${document.getElementById('successMetodeBayar').innerText}</p>
+                    <br>
+                    <h4>Ringkasan Pesanan:</h4>
+                    ${document.getElementById('successProductSummary').innerHTML}
+                    <hr style="border-top: 1px dashed #000; margin: 10px 0;">
+                    <p><strong>Total Pembayaran:</strong> ${document.getElementById('successTotalHarga').innerText}</p>
+                </div>
+            </div>
+        `;
+        window.print();
+        document.body.innerHTML = originalBody;
+        closeSuccessModal();
+    }
+    // END: NEW CODE FOR PRINTING RECEIPT
 
     document.addEventListener('DOMContentLoaded', function() {
         renderCart();
