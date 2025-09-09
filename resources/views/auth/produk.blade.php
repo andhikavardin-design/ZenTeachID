@@ -273,7 +273,7 @@
 
     <header>
         <div class="logo">
-            <img src="Video/A.jpg" alt="Logo ZenTechID" class="logo-img">
+            <img src="{{ asset('Video/A.jpg') }}" alt="Logo ZenTechID" class="logo-img">
             <span class="logo-text">ZenTechID</span>
         </div>
         <nav>
@@ -388,14 +388,16 @@
                 <p><strong>Alamat Pengiriman:</strong> <span id="summaryAddress"></span></p>
                 <p><strong>Metode Pembayaran:</strong> <span id="summaryPaymentMethod"></span></p>
             </div>
+            <button class="print-btn" onclick="printReceipt()">Cetak Struk</button>
         </div>
     </div>
+
 <script>
     // Data produk awal, disarankan menggunakan nama file yang singkat dan tidak ada spasi
     const defaultProducts = [
         { "id": "1", "name": "ASUS ROG Strix", "image": "{{ asset('Video/z.jpg') }}", "price": 15000000, "description": "Laptop gaming ASUS ROG Strix menawarkan performa maksimal untuk pengalaman bermain game yang tak tertandingi.", "stock": 10 },
         { "id": "2", "name": "ASUS ZenBook", "image": "{{ asset('Video/b.jpg') }}", "price": 12500000, "description": "ASUS ZenBook adalah laptop ultra-portabel yang stylish dan bertenaga, ideal untuk produktivitas saat bepergian.", "stock": 15 },
-        { "id": "3", "name": "ASUS TUF Gaming", "image": "{{ asset('Video/c.jpg') }}", "price": 13000000, "description": "ASUS TUF Gaming dirancang untuk daya tahan ekstrem dan performa gaming yang andal, cocok untuk para gamer yang membutuhkan ketangguhan.", "stock": 5 },
+        { "id": "3", "name": "ASUS TUF Gaming", "image": "{{ asset('Video/c.jpg') }}", "price": 13000000, "description": "ASUS TUF Gaming dirancang untuk daya tahan ekstrem dan performa gaming yang handal, cocok untuk para gamer yang membutuhkan ketangguhan.", "stock": 5 },
         { "id": "4", "name": "ASUS VivoBook", "image": "{{ asset('Video/d.jpg') }}", "price": 10500000, "description": "ASUS VivoBook adalah seri laptop yang menawarkan keseimbangan sempurna antara performa dan gaya, dengan berbagai pilihan warna.", "stock": 20 },
         { "id": "5", "name": "ASUS ROG Zephyrus", "image": "{{ asset('Video/e.jpg') }}", "price": 18000000, "description": "Laptop gaming super tipis dan ringan, ASUS ROG Zephyrus, tidak mengorbankan performa. Sangat cocok untuk para gamer profesional.", "stock": 8 },
         { "id": "6", "name": "ASUS ExpertBook", "image": "{{ asset('Video/f.jpg') }}", "price": 11500000, "description": "Dirancang untuk profesional, ASUS ExpertBook menawarkan keamanan tingkat tinggi dan performa bisnis yang solid.", "stock": 12 },
@@ -456,6 +458,7 @@
                     <h3>${escapeHtml(item.name)}</h3>
                     <div class="card-text-container"><p>${escapeHtml(item.description)}</p></div>
                     <p>Rp ${numberWithCommas(item.price)}</p>
+                    <p class="stock-info">Stok: ${item.stock > 0 ? item.stock : 'Habis'}</p>
                 `;
                 card.onclick = () => showDescriptionModal(item.id);
                 productGrid.appendChild(card);
@@ -484,20 +487,60 @@
         document.getElementById('descPrice').innerText = 'Rp ' + numberWithCommas(product.price);
         document.getElementById('descDescription').innerText = escapeHtml(product.description);
         
+        // Hapus info stok sebelumnya jika ada
+        const existingStockInfo = document.querySelector('#productDetails .stock-info-detail');
+        if (existingStockInfo) {
+            existingStockInfo.remove();
+        }
+
+        // Tambahkan informasi stok ke modal detail
+        const stockInfo = document.createElement('p');
+        stockInfo.className = 'stock-info-detail'; // Tambahkan class agar mudah dihapus/diupdate
+        stockInfo.innerText = `Stok: ${product.stock > 0 ? product.stock : 'Habis'}`;
+        stockInfo.style.fontWeight = 'bold';
+        stockInfo.style.marginTop = '10px';
+        document.getElementById('productDetails').insertBefore(stockInfo, document.querySelector('.modal-buttons'));
+    
         document.getElementById('displayUsername').innerText = loggedInUsername;
         document.getElementById('commentProductName').value = escapeHtml(product.name);
         loadAndRenderComments(product.name);
+    
+        // Kontrol tombol beli berdasarkan stok
+        const buyNowBtn = document.querySelector('.buy-now-btn');
+        const addToCartBtn = document.querySelector('.add-to-cart-btn');
+        if (product.stock > 0) {
+            buyNowBtn.disabled = false;
+            addToCartBtn.disabled = false;
+            buyNowBtn.style.opacity = '1';
+            addToCartBtn.style.opacity = '1';
+        } else {
+            buyNowBtn.disabled = true;
+            addToCartBtn.disabled = true;
+            buyNowBtn.style.opacity = '0.5';
+            addToCartBtn.style.opacity = '0.5';
+        }
     
         document.getElementById('descriptionModal').style.display = 'flex';
     }
     
     function closeDescriptionModal() {
         document.getElementById('descriptionModal').style.display = 'none';
+        // Hapus elemen stok tambahan agar tidak menumpuk saat modal dibuka lagi
+        const existingStockInfo = document.querySelector('#productDetails .stock-info-detail');
+        if (existingStockInfo) {
+            existingStockInfo.remove();
+        }
     }
     
     function showCheckoutModal() {
         if (!selectedProduct) return;
         
+        // Cek stok sebelum menampilkan modal checkout
+        if (selectedProduct.stock <= 0) {
+            alert("Maaf, produk ini sudah habis.");
+            return;
+        }
+
         closeDescriptionModal();
     
         document.getElementById('checkoutImage').src = escapeHtml(selectedProduct.image);
@@ -528,7 +571,7 @@
         const address = document.getElementById('address').value;
         if (address) {
             const encodedAddress = encodeURIComponent(address);
-            window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+            window.open(`http://maps.google.com/?q=${encodedAddress}`, '_blank');
         } else {
             alert('Silakan masukkan alamat terlebih dahulu.');
         }
@@ -543,6 +586,17 @@
     
         if (!paymentMethod) {
             alert('Silakan pilih metode pembayaran.');
+            return;
+        }
+
+        // Cek stok terakhir kali sebelum pembelian
+        const currentProducts = getProducts();
+        const productInStock = currentProducts.find(p => p.id === selectedProduct.id);
+
+        if (!productInStock || productInStock.stock <= 0) {
+            alert("Maaf, stok produk ini telah habis.");
+            closeCheckoutModal(); // Tutup modal checkout
+            renderProducts(getProducts()); // Perbarui tampilan produk
             return;
         }
     
@@ -569,6 +623,16 @@
         let existingOrders = JSON.parse(localStorage.getItem('adminOrders')) || [];
         existingOrders.push(order);
         localStorage.setItem('adminOrders', JSON.stringify(existingOrders));
+
+        // Kurangi stok produk setelah pembelian berhasil
+        let allProducts = getProducts();
+        const productIndex = allProducts.findIndex(p => p.id === selectedProduct.id);
+        if (productIndex !== -1 && allProducts[productIndex].stock > 0) {
+            allProducts[productIndex].stock -= 1;
+            localStorage.setItem('adminProducts', JSON.stringify(allProducts));
+            // Perbarui selectedProduct agar konsisten dengan data terbaru
+            selectedProduct.stock = allProducts[productIndex].stock;
+        }
     
         // Tampilkan modal sukses dengan data yang diisi
         document.getElementById('summaryProductName').innerText = selectedProduct.name;
@@ -580,6 +644,7 @@
     
         closeCheckoutModal();
         document.getElementById('successModal').style.display = 'flex';
+        renderProducts(getProducts()); // Perbarui tampilan produk setelah pembelian
     }
     
     function closeSuccessModal() {
@@ -651,11 +716,24 @@
     
     function addToCart() {
         if (!selectedProduct) return;
+        
+        // Periksa stok sebelum menambahkan ke keranjang
+        if (selectedProduct.stock <= 0) {
+            alert("Maaf, produk ini sudah habis.");
+            return;
+        }
+
         let cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         const existingItemIndex = cartItems.findIndex(item => item.id === selectedProduct.id);
-    
+
         if (existingItemIndex > -1) {
-            cartItems[existingItemIndex].quantity += 1;
+            // Cek apakah kuantitas yang diminta tidak melebihi stok yang tersedia
+            if (cartItems[existingItemIndex].quantity < selectedProduct.stock) {
+                cartItems[existingItemIndex].quantity += 1;
+            } else {
+                alert(`Maaf, Anda tidak dapat menambahkan lebih dari ${selectedProduct.stock} unit untuk produk ini karena stok terbatas.`);
+                return;
+            }
         } else {
             cartItems.push({
                 id: selectedProduct.id,
@@ -665,8 +743,79 @@
                 quantity: 1
             });
         }
-    
+
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
         alert(`${selectedProduct.name} telah ditambahkan ke keranjang!`);
+        
+        // Tutup modal deskripsi untuk menghindari kebingungan dan memicu render ulang
+        closeDescriptionModal();
+        renderProducts(getProducts()); // Perbarui tampilan produk di grid utama
+    }
+
+    // Fungsi baru untuk mencetak struk
+    function printReceipt() {
+        // Mendapatkan data dari modal sukses
+        const productName = document.getElementById('summaryProductName').innerText;
+        const productPrice = document.getElementById('summaryProductPrice').innerText;
+        const fullName = document.getElementById('summaryFullName').innerText;
+        const phoneNumber = document.getElementById('summaryPhoneNumber').innerText;
+        const address = document.getElementById('summaryAddress').innerText;
+        const paymentMethod = document.getElementById('summaryPaymentMethod').innerText;
+
+        // Membuat konten HTML untuk struk
+        const receiptContent = `
+            <html>
+            <head>
+                <title>Struk Pembayaran ZenTechID</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; margin: 20px; color: #333; }
+                    .receipt-container { max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h1 { margin: 0; font-size: 24px; color: #4CAF50; }
+                    .details p { margin: 5px 0; }
+                    .details strong { width: 150px; display: inline-block; }
+                    .footer { text-align: center; margin-top: 30px; font-size: 14px; color: #777; }
+                    @media print {
+                        body { visibility: hidden; }
+                        .receipt-container { visibility: visible; position: absolute; top: 0; left: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="receipt-container">
+                    <div class="header">
+                        <h1>ZenTechID</h1>
+                        <h3>Struk Pembayaran</h3>
+                        <p>Tanggal: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    <div class="details">
+                        <p><strong>Nama Produk:</strong> ${productName}</p>
+                        <p><strong>Harga:</strong> ${productPrice}</p>
+                        <hr>
+                        <p><strong>Nama Pelanggan:</strong> ${fullName}</p>
+                        <p><strong>Nomor Telepon:</strong> ${phoneNumber}</p>
+                        <p><strong>Alamat Pengiriman:</strong> ${address}</p>
+                        <p><strong>Metode Pembayaran:</strong> ${paymentMethod}</p>
+                    </div>
+                    <div class="footer">
+                        <p>Terima kasih telah berbelanja di ZenTechID!</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        // Membuka jendela baru untuk dicetak
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+        printWindow.document.write(receiptContent);
+        printWindow.document.close();
+
+        // Menunggu konten dimuat lalu mencetak dan menutup jendela
+        printWindow.onload = function() {
+            printWindow.print();
+            printWindow.close();
+        };
     }
 </script>
+</body>
